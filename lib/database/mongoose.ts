@@ -20,6 +20,8 @@ let cached: MongooseConnection = globalThis.mongooseConn || { conn: null, promis
 
 export const connectToDatabase = async (): Promise<Mongoose> => {
   if (cached.conn) return cached.conn; // Return existing connection
+  console.log("Database connected successfully");
+
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URL, {
@@ -31,5 +33,6 @@ export const connectToDatabase = async (): Promise<Mongoose> => {
   cached.conn = await cached.promise;
   globalThis.mongooseConn = cached; // Store connection globally
 
+  console.log("Database connected successfully");
   return cached.conn;
 };
