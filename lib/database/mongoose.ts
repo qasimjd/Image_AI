@@ -1,30 +1,35 @@
-import mongoose, { Mongoose } from 'mongoose';
+import mongoose, { Mongoose } from "mongoose";
 
-const MONGODB_URL = process.env.MONGODB_URL;
+const MONGODB_URL = process.env.MONGODB_URL as string;
+
+if (!MONGODB_URL) {
+  throw new Error("❌ Missing MONGODB_URL in environment variables.");
+}
 
 interface MongooseConnection {
   conn: Mongoose | null;
   promise: Promise<Mongoose> | null;
 }
 
-let cached: MongooseConnection = (global as any).mongoose
-
-if(!cached) {
-  cached = (global as any).mongoose = { 
-    conn: null, promise: null 
-  }
+// Use globalThis to prevent multiple connections in development
+declare global {
+  var mongooseConn: MongooseConnection | undefined;
 }
 
-export const connectToDatabase = async () => {
-  if(cached.conn) return cached.conn;
+let cached: MongooseConnection = globalThis.mongooseConn || { conn: null, promise: null };
 
-  if(!MONGODB_URL) throw new Error('Missing MONGODB_URL');
+export const connectToDatabase = async (): Promise<Mongoose> => {
+  if (cached.conn) return cached.conn; // Return existing connection
 
-  cached.promise = 
-    cached.promise || 
-    mongoose.connect(MONGODB_URL, {bufferCommands: false })
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URL, {
+      dbName: "image-ai", 
+      bufferCommands: false,
+    });
+  }
 
   cached.conn = await cached.promise;
+  globalThis.mongooseConn = cached; // Store connection globally
 
   return cached.conn;
-}
+};
