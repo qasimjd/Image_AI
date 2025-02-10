@@ -1,3 +1,6 @@
+import MobileNav from "@/components/shared/MobileNav";
+import Sidebar from "@/components/shared/sidebar";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -5,8 +8,8 @@ export default function RootLayout({
 }>) {
     return (
         <main className="root">
-            Sidebar
-            MobileNav
+            <Sidebar />
+            <MobileNav />
 
             <div className="root-container">
                 <div className="wrapper">
